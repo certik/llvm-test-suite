@@ -10,18 +10,21 @@ for f in files_all:
         s = open(f).read()
     except UnicodeDecodeError:
         continue
-    if s.find(r"{ dg-options") != -1:
-        files.append(f)
+    if s.find(r"{ dg-options") == -1:
+        if s.find(r"{ dg-additional") == -1:
+            if s.find(r"{ dg-do run }") != -1:
+                files.append(f)
 N = len(files)
 print("Number of f90 tests:", N)
-fail = 0
+success = 0
 for n, f in enumerate(files):
     r = os.system(f"lfortran --no-warnings --show-ast --no-color {f} &> a.ast")
+    #r = os.system(f"gfortran {f} &> a.ast")
     ok = True
     if r != 0:
         ok = False
-    if not ok: fail += 1
+    if ok: success += 1
     print(f"{n} / {N}: {f}, {ok}")
-    if n > 30: break
-print(f"Passed {fail} / {N}")
+    #if n > 100: break
+print(f"Passed {success} / {N}")
 print("Done")
